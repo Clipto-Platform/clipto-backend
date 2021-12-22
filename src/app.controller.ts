@@ -15,16 +15,22 @@ import { TwitterApi, TwitterApiReadOnly } from 'twitter-api-v2';
 import { AppService } from './app.service';
 import { VerifyUserDto } from './dto/VerifyUser.dto';
 import { UserService } from './services/user.service';
+import * as fs from 'fs';
+import { Bundlr } from '@bundlr-network/client';
+import * as mime from 'mime-types';
 
 @Controller()
 export class AppController {
   twitterClient: TwitterApiReadOnly;
+  bundlr: Bundlr;
 
   constructor(
     private readonly appService: AppService,
     private readonly userService: UserService,
   ) {
     this.twitterClient = new TwitterApi(process.env.TWITTER_KEY).readOnly;
+    const jwk = JSON.parse(fs.readFileSync('wallet.json').toString());
+    this.bundlr = new Bundlr('https://node1.bundlr.network/', 'arweave', jwk);
   }
 
   @Get('user/:address')
@@ -51,7 +57,7 @@ export class AppController {
 
     if (
       tweetResponse.data.text.indexOf(address) !== -1 &&
-      tweetResponse.data.text.indexOf('@cliptodao') !== -1
+      tweetResponse.data.text.toLocaleLowerCase().indexOf('@cliptodao') !== -1
     ) {
       const twitterHandle = tweetResponse.includes.users[0].username;
       // create the user
@@ -63,8 +69,14 @@ export class AppController {
   }
 
   @Post('upload')
-  @UseInterceptors(FileInterceptor('file'))
-  uploadFile(@UploadedFile() file: Express.Multer.File) {
-    console.log(file);
+  @UseInterceptors(FileInterceptor('asset'))
+  async uploadFile(@UploadedFile() file: Express.Multer.File) {
+    const uploadResult = await this.bundlr.uploader.upload(file.buffer, [
+      {
+        name: 'Content-Type',
+        value: mime.lookup(file.originalname) || 'unknown',
+      },
+    ]);
+    return { result: `ar://${uploadResult.data.id}` };
   }
 }
