@@ -6,9 +6,7 @@ import { VerifiedUser, Prisma } from '@prisma/client';
 export class UserService {
   constructor(private prisma: PrismaService) {}
 
-  async user(
-    userWhereUniqueInput: Prisma.VerifiedUserWhereUniqueInput,
-  ): Promise<VerifiedUser | null> {
+  async user(userWhereUniqueInput: Prisma.VerifiedUserWhereUniqueInput): Promise<VerifiedUser | null> {
     return this.prisma.verifiedUser.findUnique({
       where: userWhereUniqueInput,
     });
@@ -31,9 +29,7 @@ export class UserService {
     });
   }
 
-  async createUser(
-    data: Prisma.VerifiedUserCreateInput,
-  ): Promise<VerifiedUser> {
+  async createUser(data: Prisma.VerifiedUserCreateInput): Promise<VerifiedUser> {
     return this.prisma.verifiedUser.create({
       data,
     });
@@ -50,9 +46,7 @@ export class UserService {
     });
   }
 
-  async deleteUser(
-    where: Prisma.VerifiedUserWhereUniqueInput,
-  ): Promise<VerifiedUser> {
+  async deleteUser(where: Prisma.VerifiedUserWhereUniqueInput): Promise<VerifiedUser> {
     return this.prisma.verifiedUser.delete({
       where,
     });

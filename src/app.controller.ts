@@ -11,32 +11,25 @@ import {
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { VerifiedUser } from '@prisma/client';
-import { TwitterApi, TwitterApiReadOnly } from 'twitter-api-v2';
 import { AppService } from './app.service';
 import { VerifyUserDto } from './dto/VerifyUser.dto';
 import { UserService } from './services/user.service';
 import * as fs from 'fs';
 import { Bundlr } from '@bundlr-network/client';
 import * as mime from 'mime-types';
+import { CreateUserDto } from './dto/CreateUserDto';
 
 @Controller()
 export class AppController {
-  twitterClient: TwitterApiReadOnly;
   bundlr: Bundlr;
 
-  constructor(
-    private readonly appService: AppService,
-    private readonly userService: UserService,
-  ) {
-    this.twitterClient = new TwitterApi(process.env.TWITTER_KEY).readOnly;
+  constructor(private readonly appService: AppService, private readonly userService: UserService) {
     const jwk = JSON.parse(fs.readFileSync('wallet.json').toString());
     this.bundlr = new Bundlr('https://node1.bundlr.network/', 'arweave', jwk);
   }
 
   @Get('user/:address')
-  public async getUser(
-    @Param('address') address: string,
-  ): Promise<VerifiedUser | any> {
+  public async getUser(@Param('address') address: string): Promise<VerifiedUser | any> {
     const result = await this.userService.user({ address });
     if (!result) {
       throw new HttpException('Not found', HttpStatus.NOT_FOUND);
@@ -47,25 +40,28 @@ export class AppController {
   @Post('user/verify')
   public async verifyUser(@Body() verifyUserDto: VerifyUserDto) {
     const { address, tweetUrl } = verifyUserDto;
-    const tweetId = tweetUrl.replace(/\/$/, '').split('/').pop();
+    return await this.appService.verifyTwitter(tweetUrl, address);
+  }
 
-    const tweetResponse = await this.twitterClient.v2.singleTweet(tweetId, {
-      'tweet.fields': ['author_id', 'lang', 'text', 'created_at'],
-      'user.fields': ['name', 'username', 'profile_image_url'],
-      expansions: ['author_id'],
-    });
+  @Post('user/create')
+  public async create(@Body() createUserDto: CreateUserDto) {
+    const { address, tweetUrl } = createUserDto;
+    const tweetResponse = await this.appService.verifyTwitter(tweetUrl, address);
 
-    if (
-      tweetResponse.data.text.indexOf(address) !== -1 &&
-      tweetResponse.data.text.toLocaleLowerCase().indexOf('@cliptodao') !== -1
-    ) {
-      const twitterHandle = tweetResponse.includes.users[0].username;
-      // create the user
-      await this.userService.createUser({ address, twitterHandle });
-      // return the twitter response so we can bundle the user's profile image on the frontend
-      return tweetResponse;
+    const existingUser = await this.userService.user({ address });
+    if (existingUser) {
+      throw new HttpException('User already created!', HttpStatus.BAD_REQUEST);
     }
-    throw new HttpException('Invalid tweet', HttpStatus.BAD_REQUEST);
+    const result = await this.userService.createUser({
+      twitterHandle: tweetResponse.includes.users[0].username,
+      address,
+      profilePicture: createUserDto.profilePicture,
+      deliveryTime: createUserDto.deliveryTime,
+      bio: createUserDto.bio,
+      demos: createUserDto.demos,
+      userName: createUserDto.userName,
+    });
+    return result;
   }
 
   @Post('upload')

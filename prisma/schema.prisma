@@ -11,7 +11,12 @@ datasource db {
 }
 
 model VerifiedUser {
-  id            Int    @id @default(autoincrement())
-  address       String @unique
-  twitterHandle String @unique
+  id             Int      @id @default(autoincrement())
+  userName       String   @unique
+  address        String   @unique
+  twitterHandle  String   @unique
+  profilePicture String
+  deliveryTime   Int
+  demos          String[]
+  bio            String
 }
