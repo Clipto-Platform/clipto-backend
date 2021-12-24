@@ -27,7 +27,7 @@ model Request {
   creator     String
   amount      Float
   description String
-  deadline    String
+  deadline    Int
   delivered   Boolean @default(false)
   txHash      String  @unique
 }

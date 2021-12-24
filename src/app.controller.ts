@@ -18,12 +18,20 @@ import * as fs from 'fs';
 import { Bundlr } from '@bundlr-network/client';
 import * as mime from 'mime-types';
 import { CreateUserDto } from './dto/CreateUserDto';
+import { CreateRequestDto } from './dto/CreateRequestDto';
+import { RequestService } from './services/request.service';
+import { BlockchainService } from './services/blockchain.service';
 
 @Controller()
 export class AppController {
   bundlr: Bundlr;
 
-  constructor(private readonly appService: AppService, private readonly userService: UserService) {
+  constructor(
+    private readonly appService: AppService,
+    private readonly userService: UserService,
+    private readonly blockchainService: BlockchainService,
+    private readonly requestService: RequestService,
+  ) {
     const jwk = JSON.parse(fs.readFileSync('wallet.json').toString());
     this.bundlr = new Bundlr('https://node1.bundlr.network/', 'arweave', jwk);
   }
@@ -64,9 +72,17 @@ export class AppController {
     return result;
   }
 
+  @Post('request/create')
+  public async requestCreate(@Body() createRequestDto: CreateRequestDto) {
+    const result = await this.blockchainService.validateRequestTx(
+      createRequestDto.txHash,
+      createRequestDto.amount.toString(),
+      createRequestDto.requester,
+    );
+    console.log(result);
+    return this.requestService.createRequest(createRequestDto);
+  }
 
-
-  
   @Post('upload')
   @UseInterceptors(FileInterceptor('asset'))
   async uploadFile(@UploadedFile() file: Express.Multer.File) {

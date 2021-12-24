@@ -12,5 +12,5 @@ export class CreateRequestDto {
   @IsNumber()
   deadline: number;
   @IsString()
-  transactionHash: string;
+  txHash: string;
 }
