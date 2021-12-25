@@ -6,7 +6,7 @@ import { Request, Prisma } from '@prisma/client';
 export class RequestService {
   constructor(private prisma: PrismaService) {}
 
-  async user(userWhereUniqueInput: Prisma.RequestWhereUniqueInput): Promise<Request | null> {
+  async request(userWhereUniqueInput: Prisma.RequestWhereUniqueInput): Promise<Request | null> {
     return this.prisma.request.findUnique({
       where: userWhereUniqueInput,
     });

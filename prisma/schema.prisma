@@ -16,18 +16,19 @@ model VerifiedUser {
   address        String   @unique
   twitterHandle  String   @unique
   profilePicture String
-  deliveryTime   Float
+  deliveryTime   Int
   demos          String[]
   bio            String
 }
 
 model Request {
-  id          Int     @id @default(autoincrement())
+  id          Int      @id @default(autoincrement())
   requester   String
   creator     String
-  amount      Float
+  amount      String
   description String
   deadline    Int
-  delivered   Boolean @default(false)
-  txHash      String  @unique
+  delivered   Boolean  @default(false)
+  txHash      String   @unique
+  created     DateTime @default(now())
 }

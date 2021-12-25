@@ -1,12 +1,12 @@
-import { IsEthereumAddress, IsNumber, IsString } from 'class-validator';
+import { IsEthereumAddress, IsNumber, IsNumberString, IsString } from 'class-validator';
 
 export class CreateRequestDto {
   @IsEthereumAddress()
   requester: string;
   @IsEthereumAddress()
   creator: string;
-  @IsNumber()
-  amount: number;
+  @IsNumberString()
+  amount: string;
   @IsString()
   description: string;
   @IsNumber()

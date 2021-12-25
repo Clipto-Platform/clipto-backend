@@ -10,7 +10,7 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { VerifiedUser } from '@prisma/client';
+import { VerifiedUser, Request } from '@prisma/client';
 import { AppService } from './app.service';
 import { VerifyUserDto } from './dto/VerifyUser.dto';
 import { UserService } from './services/user.service';
@@ -74,13 +74,25 @@ export class AppController {
 
   @Post('request/create')
   public async requestCreate(@Body() createRequestDto: CreateRequestDto) {
-    const result = await this.blockchainService.validateRequestTx(
-      createRequestDto.txHash,
-      createRequestDto.amount.toString(),
-      createRequestDto.requester,
-    );
-    console.log(result);
-    return this.requestService.createRequest(createRequestDto);
+    if (
+      await this.blockchainService.validateRequestTx(
+        createRequestDto.txHash,
+        createRequestDto.amount,
+        createRequestDto.requester,
+      )
+    ) {
+      return this.requestService.createRequest(createRequestDto);
+    }
+    throw new HttpException('Invalid associated TX hash!', HttpStatus.BAD_REQUEST);
+  }
+
+  @Get('request/receiver/:address')
+  public async requestByReceiver(@Param('address') address: string): Promise<Request[]> {
+    const result = await this.requestService.requests({ where: { requester: address } });
+    if (!result) {
+      throw new HttpException('Not found', HttpStatus.NOT_FOUND);
+    }
+    return result;
   }
 
   @Post('upload')
