@@ -24,17 +24,12 @@ import { BlockchainService } from './services/blockchain.service';
 
 @Controller()
 export class AppController {
-  bundlr: Bundlr;
-
   constructor(
     private readonly appService: AppService,
     private readonly userService: UserService,
     private readonly blockchainService: BlockchainService,
     private readonly requestService: RequestService,
-  ) {
-    const jwk = JSON.parse(fs.readFileSync('wallet.json').toString());
-    this.bundlr = new Bundlr('https://node1.bundlr.network/', 'arweave', jwk);
-  }
+  ) {}
 
   @Get('user/:address')
   public async getUser(@Param('address') address: string): Promise<VerifiedUser | any> {
@@ -95,15 +90,26 @@ export class AppController {
     return result;
   }
 
-  @Post('upload')
-  @UseInterceptors(FileInterceptor('asset'))
-  async uploadFile(@UploadedFile() file: Express.Multer.File) {
-    const uploadResult = await this.bundlr.uploader.upload(file.buffer, [
-      {
-        name: 'Content-Type',
-        value: mime.lookup(file.originalname) || 'unknown',
-      },
-    ]);
-    return { result: `ar://${uploadResult.data.id}` };
+  @Get('request/creator/:address')
+  public async requestByCreator(@Param('address') address: string): Promise<Request[]> {
+    const result = await this.requestService.requests({ where: { creator: address } });
+    if (!result) {
+      throw new HttpException('Not found', HttpStatus.NOT_FOUND);
+    }
+    return result;
   }
+
+  //todo: request / profile updates, these have to be predecated against signTypedData_v4 from users, as well as checking the relevant TXes
+
+  // @Post('upload')
+  // @UseInterceptors(FileInterceptor('asset'))
+  // async uploadFile(@UploadedFile() file: Express.Multer.File) {
+  //   const uploadResult = await this.bundlr.uploader.upload(file.buffer, [
+  //     {
+  //       name: 'Content-Type',
+  //       value: mime.lookup(file.originalname) || 'unknown',
+  //     },
+  //   ]);
+  //   return { result: `ar://${uploadResult.data.id}` };
+  // }
 }
