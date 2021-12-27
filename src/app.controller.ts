@@ -82,14 +82,6 @@ export class AppController {
     throw new HttpException('Invalid associated TX hash!', HttpStatus.BAD_REQUEST);
   }
 
-  @Post('request/finish')
-  public async requestFinish(@Body() finishRequestDto: FinishRequestDto) {
-    if (true) {
-      return this.requestService.updateRequest({ where: { id: finishRequestDto.id }, data: { delivered: true } });
-    }
-    //throw new HttpException('Invalid associated TX hash!', HttpStatus.BAD_REQUEST);
-  }
-
   @Get('request/receiver/:address')
   public async requestByReceiver(@Param('address') address: string): Promise<Request[]> {
     const result = await this.requestService.requests({ where: { requester: address } });
