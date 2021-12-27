@@ -21,6 +21,7 @@ import { CreateUserDto } from './dto/CreateUserDto';
 import { CreateRequestDto } from './dto/CreateRequestDto';
 import { RequestService } from './services/request.service';
 import { BlockchainService } from './services/blockchain.service';
+import { FinishRequestDto } from './dto/FinishRequestDto';
 
 @Controller()
 export class AppController {
@@ -29,7 +30,7 @@ export class AppController {
     private readonly userService: UserService,
     private readonly blockchainService: BlockchainService,
     private readonly requestService: RequestService,
-  ) {}
+  ) { }
 
   @Get('user/:address')
   public async getUser(@Param('address') address: string): Promise<VerifiedUser | any> {
@@ -79,6 +80,14 @@ export class AppController {
       return this.requestService.createRequest(createRequestDto);
     }
     throw new HttpException('Invalid associated TX hash!', HttpStatus.BAD_REQUEST);
+  }
+
+  @Post('request/finish')
+  public async requestFinish(@Body() finishRequestDto: FinishRequestDto) {
+    if (true) {
+      return this.requestService.updateRequest({ where: { id: finishRequestDto.id }, data: { delivered: true } });
+    }
+    //throw new HttpException('Invalid associated TX hash!', HttpStatus.BAD_REQUEST);
   }
 
   @Get('request/receiver/:address')
