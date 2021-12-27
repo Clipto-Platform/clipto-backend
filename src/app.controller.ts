@@ -21,7 +21,6 @@ import { CreateUserDto } from './dto/CreateUserDto';
 import { CreateRequestDto } from './dto/CreateRequestDto';
 import { RequestService } from './services/request.service';
 import { BlockchainService } from './services/blockchain.service';
-import { FinishRequestDto } from './dto/FinishRequestDto';
 
 @Controller()
 export class AppController {
