@@ -31,6 +31,14 @@ export class AppController {
     private readonly blockchainService: BlockchainService,
     private readonly requestService: RequestService,
   ) { }
+  @Get('users')
+  public async getUsers(): Promise<Array<VerifiedUser> | any> {
+    const result = await this.userService.users({});
+    if (!result) {
+      throw new HttpException('Not found', HttpStatus.NOT_FOUND);
+    }
+    return result;
+  }
 
   @Get('user/:address')
   public async getUser(@Param('address') address: string): Promise<VerifiedUser | any> {

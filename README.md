@@ -15,3 +15,7 @@ Still need to implement requests/etc.
  3. `npm start`
 
  The project runs on localhost:8000
+
+
+ ## useful commands
+ 3. `npx prisma studio`
