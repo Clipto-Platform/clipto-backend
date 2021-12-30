@@ -21,6 +21,7 @@ import { CreateUserDto } from './dto/CreateUserDto';
 import { CreateRequestDto } from './dto/CreateRequestDto';
 import { RequestService } from './services/request.service';
 import { BlockchainService } from './services/blockchain.service';
+import { FinishRequestDto } from './dto/FinishRequestDto';
 
 @Controller()
 export class AppController {
@@ -118,7 +119,13 @@ export class AppController {
     }
     return result[0];
   }
-
+  @Post('request/finish')
+  public async requestFinish(@Body() finishRequestDto: FinishRequestDto) {
+    if (true) {
+      return this.requestService.updateRequest({ where: { id: finishRequestDto.id }, data: { delivered: true } });
+    }
+    //throw new HttpException('Invalid associated TX hash!', HttpStatus.BAD_REQUEST);
+  }
   //todo: request / profile updates, these have to be predecated against signTypedData_v4 from users, as well as checking the relevant TXes
 
   // @Post('upload')
