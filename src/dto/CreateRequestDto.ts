@@ -1,6 +1,8 @@
 import { IsEthereumAddress, IsNumber, IsNumberString, IsString } from 'class-validator';
 
 export class CreateRequestDto {
+  @IsNumber()
+  requestId: number;
   @IsEthereumAddress()
   requester: string;
   @IsEthereumAddress()

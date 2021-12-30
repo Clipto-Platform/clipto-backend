@@ -23,6 +23,7 @@ model VerifiedUser {
 
 model Request {
   id          Int      @id @default(autoincrement())
+  requestId   Int
   requester   String
   creator     String
   amount      String
