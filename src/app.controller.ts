@@ -107,6 +107,18 @@ export class AppController {
     return result;
   }
 
+  @Get('request/creator/:address/:requestId')
+  public async requestByCreatorAndRequestId(@Param('address') address: string, @Param('requestId') requestId: string): Promise<Request> {
+    const result = await this.requestService.requests({ where: { creator: address, requestId: parseInt(requestId) } });
+    if (!result) {
+      throw new HttpException('Not found', HttpStatus.NOT_FOUND);
+    }
+    if (result[1]) { //if length has more than one entry, this should be unique and something is very wrong
+      throw new HttpException('Hackers or bugs?', HttpStatus.NOT_FOUND);
+    }
+    return result[0];
+  }
+
   //todo: request / profile updates, these have to be predecated against signTypedData_v4 from users, as well as checking the relevant TXes
 
   // @Post('upload')
