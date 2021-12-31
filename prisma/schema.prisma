@@ -19,7 +19,7 @@ model VerifiedUser {
   deliveryTime   Int
   demos          String[]
   bio            String
-  // price          Int
+  price          Decimal
 }
 
 model Request {

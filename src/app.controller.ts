@@ -72,6 +72,7 @@ export class AppController {
       bio: createUserDto.bio,
       demos: createUserDto.demos,
       userName: createUserDto.userName,
+      price: createUserDto.price
     });
     return result;
   }
