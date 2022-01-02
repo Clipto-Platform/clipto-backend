@@ -5,9 +5,11 @@ import { BlockchainService } from './services/blockchain.service';
 import { PrismaService } from './services/prisma.service';
 import { RequestService } from './services/request.service';
 import { UserService } from './services/user.service';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   controllers: [AppController],
   providers: [AppService, UserService, RequestService, BlockchainService, PrismaService],
+  imports: [AuthModule],
 })
 export class AppModule {}
