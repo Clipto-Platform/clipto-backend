@@ -4,12 +4,14 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 
 @Injectable()
 export class Web3Strategy extends PassportStrategy(Strategy) {
+  messageToBeSigned = 'I am onboarding to Clipto';
+
   constructor() {
     super();
   }
 
   async validate(address: string, message: string): Promise<any> {
-    if (message !== 'I am onboarding to Clipto') {
+    if (message !== this.messageToBeSigned) {
       throw new HttpException('Incorrect message signed!', HttpStatus.UNAUTHORIZED);
     }
     return { address };

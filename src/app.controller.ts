@@ -63,7 +63,7 @@ export class AppController {
     const { address, tweetUrl } = createUserDto;
     const tweetResponse = await this.appService.verifyTwitter(tweetUrl, address);
 
-    if (req.user.address != address) {
+    if (req.user.address !== address) {
       throw new HttpException('Signed message was from a different address!', HttpStatus.UNAUTHORIZED);
     }
 
