@@ -15,4 +15,6 @@ export class CreateUserDto {
   tweetUrl: string;
   @IsString()
   userName: string;
+  @IsNumber()
+  price: number;
 }

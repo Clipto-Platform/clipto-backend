@@ -19,3 +19,4 @@ Still need to implement requests/etc.
 
  ## useful commands
  3. `npx prisma studio`
+ 4. `npx prisma migrate` when you make changes to the schema, you need to migrate the db to the new schema
