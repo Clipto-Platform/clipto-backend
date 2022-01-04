@@ -11,8 +11,9 @@ export class AppService {
 
   async verifyTwitter(tweetUrl: string, address: string): Promise<TweetV2SingleResult> {
     const tweetId = tweetUrl.replace(/\/$/, '').split('/').pop();
+    const sanitizedTweet = tweetId.split('?')[0];
 
-    const tweetResponse = await this.twitterClient.v2.singleTweet(tweetId, {
+    const tweetResponse = await this.twitterClient.v2.singleTweet(sanitizedTweet, {
       'tweet.fields': ['author_id', 'lang', 'text', 'created_at'],
       'user.fields': ['name', 'username', 'profile_image_url'],
       expansions: ['author_id'],
