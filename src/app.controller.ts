@@ -7,6 +7,8 @@ import {
   Param,
   Post,
   UploadedFile,
+  Request as NestRequest,
+  UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -21,6 +23,7 @@ import { CreateUserDto } from './dto/CreateUserDto';
 import { CreateRequestDto } from './dto/CreateRequestDto';
 import { RequestService } from './services/request.service';
 import { BlockchainService } from './services/blockchain.service';
+import { AuthGuard } from '@nestjs/passport';
 import { FinishRequestDto } from './dto/FinishRequestDto';
 
 @Controller()
@@ -30,7 +33,7 @@ export class AppController {
     private readonly userService: UserService,
     private readonly blockchainService: BlockchainService,
     private readonly requestService: RequestService,
-  ) { }
+  ) {}
   @Get('users')
   public async getUsers(): Promise<Array<VerifiedUser> | any> {
     const result = await this.userService.users({});
@@ -55,10 +58,15 @@ export class AppController {
     return await this.appService.verifyTwitter(tweetUrl, address);
   }
 
+  @UseGuards(AuthGuard('web3'))
   @Post('user/create')
-  public async create(@Body() createUserDto: CreateUserDto) {
+  public async create(@Body() createUserDto: CreateUserDto, @NestRequest() req) {
     const { address, tweetUrl } = createUserDto;
     const tweetResponse = await this.appService.verifyTwitter(tweetUrl, address);
+
+    if (req.user.address !== address) {
+      throw new HttpException('Signed message was from a different address!', HttpStatus.UNAUTHORIZED);
+    }
 
     const existingUser = await this.userService.user({ address });
     if (existingUser) {
