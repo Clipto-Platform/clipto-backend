@@ -10,6 +10,7 @@ import {
   Request as NestRequest,
   UseGuards,
   UseInterceptors,
+  Put,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { VerifiedUser, Request } from '@prisma/client';
@@ -25,6 +26,8 @@ import { RequestService } from './services/request.service';
 import { BlockchainService } from './services/blockchain.service';
 import { AuthGuard } from '@nestjs/passport';
 import { FinishRequestDto } from './dto/FinishRequestDto';
+import { JsonRpcSigner } from '@ethersproject/providers';
+import { UpdateUserDto } from './dto/UpdateUserDto';
 
 @Controller()
 export class AppController {
@@ -33,7 +36,7 @@ export class AppController {
     private readonly userService: UserService,
     private readonly blockchainService: BlockchainService,
     private readonly requestService: RequestService,
-  ) {}
+  ) { }
   @Get('users')
   public async getUsers(): Promise<Array<VerifiedUser> | any> {
     const result = await this.userService.users({});
@@ -81,6 +84,29 @@ export class AppController {
       demos: createUserDto.demos,
       userName: createUserDto.userName,
       price: createUserDto.price
+    });
+    return result;
+  }
+
+  @UseGuards(AuthGuard('web3'))
+  @Put('user/:address')
+  public async update(@Param('address') address: string, @Body() updateUserDto: UpdateUserDto, @NestRequest() req) {
+    if (req.user.address !== address) {
+      throw new HttpException('Signed message was from a different address!', HttpStatus.UNAUTHORIZED);
+    }
+    const existingUser = await this.userService.user({ address });
+    if (!existingUser) {
+      throw new HttpException('User does not exist', HttpStatus.BAD_REQUEST);
+    }
+    const result = await this.userService.updateUser({
+      where: { address },
+      data: {
+        deliveryTime: updateUserDto.deliveryTime,
+        bio: updateUserDto.bio,
+        demos: updateUserDto.demos,
+        price: updateUserDto.price,
+        userName: updateUserDto.userName
+      }
     });
     return result;
   }

@@ -3,7 +3,7 @@ import { PassportStrategy } from '@nestjs/passport';
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 
 @Injectable()
-export class Web3Strategy extends PassportStrategy(Strategy) {
+export class Web3Strategy extends PassportStrategy(Strategy) { //TODO(jonathanng) - make message signing be correct wording updating and creating requests
   messageToBeSigned = 'I am onboarding to Clipto';
 
   constructor() {
