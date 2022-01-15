@@ -70,7 +70,10 @@ export class AppController {
     if (req.user.address !== address) {
       throw new HttpException('Signed message was from a different address!', HttpStatus.UNAUTHORIZED);
     }
-
+    // This is to prevent a user from directly sending a request to this db and create an account without creating an account on the contract 
+    if (!this.blockchainService.checkCreator(address)) {
+      throw new HttpException('User is not a creator on the contract!', HttpStatus.UNAUTHORIZED)
+    }
     const existingUser = await this.userService.user({ address });
     if (existingUser) {
       throw new HttpException('User already created!', HttpStatus.BAD_REQUEST);
