@@ -114,8 +114,10 @@ export class AppController {
     return result;
   }
 
+  @UseGuards(AuthGuard('web3'))
   @Post('request/create')
-  public async requestCreate(@Body() createRequestDto: CreateRequestDto) {
+  public async requestCreate(@Body() createRequestDto: CreateRequestDto, @NestRequest() req) {
+    throw new HttpException('Auth not implemented', HttpStatus.NOT_IMPLEMENTED)
     if (
       await this.blockchainService.validateRequestTx(
         createRequestDto.txHash,
@@ -157,8 +159,28 @@ export class AppController {
     }
     return result[0];
   }
+
+  @UseGuards(AuthGuard('web3'))
   @Post('request/finish')
-  public async requestFinish(@Body() finishRequestDto: FinishRequestDto) {
+  public async requestFinish(@Body() finishRequestDto: FinishRequestDto, @NestRequest() req) {
+    const result = await this.requestService.requests({ where: { id: finishRequestDto.id } })
+
+    //requires one and only one item in db.
+    if (result.length !== 1) {
+      throw new HttpException('Hackers or bugs?', HttpStatus.NOT_FOUND)
+    }
+    const request = result[0]
+    if (req.user.address !== request.requester || req.user.address !== request.creator) {
+      throw new HttpException('Only requester or creator can this.', HttpStatus.UNAUTHORIZED)
+    }
+    const deadline = request.deadline * 60 * 1000 * 60 * 24 + request.created.getTime()
+    if (Date.now() > deadline && req.user.address === request.requester) {
+      throw new HttpException('Deadline has not been passed. Requester cannot refund.', HttpStatus.UNAUTHORIZED)
+    }
+    if (Date.now() < deadline && req.user.address === request.creator) {
+      throw new HttpException('Deadline has been passed. Creator cannot fulfill the request.', HttpStatus.UNAUTHORIZED)
+    }
+
     if (true) {
       return this.requestService.updateRequest({ where: { id: finishRequestDto.id }, data: { delivered: true } });
     }
