@@ -36,7 +36,8 @@ export class AppController {
     private readonly userService: UserService,
     private readonly blockchainService: BlockchainService,
     private readonly requestService: RequestService,
-  ) { }
+  ) {}
+
   @Get('users')
   public async getUsers(): Promise<Array<VerifiedUser> | any> {
     const result = await this.userService.users({});
@@ -83,7 +84,7 @@ export class AppController {
       bio: createUserDto.bio,
       demos: createUserDto.demos,
       userName: createUserDto.userName,
-      price: createUserDto.price
+      price: createUserDto.price,
     });
     return result;
   }
@@ -105,7 +106,7 @@ export class AppController {
         bio: updateUserDto.bio,
         demos: updateUserDto.demos,
         price: updateUserDto.price,
-        userName: updateUserDto.userName
+        userName: updateUserDto.userName,
       }
     });
     return result;
@@ -117,7 +118,7 @@ export class AppController {
       await this.blockchainService.validateRequestTx(
         createRequestDto.txHash,
         createRequestDto.amount,
-        createRequestDto.requester,
+        createRequestDto.creator,
       )
     ) {
       return this.requestService.createRequest(createRequestDto);
@@ -144,12 +145,16 @@ export class AppController {
   }
 
   @Get('request/creator/:address/:requestId')
-  public async requestByCreatorAndRequestId(@Param('address') address: string, @Param('requestId') requestId: string): Promise<Request> {
+  public async requestByCreatorAndRequestId(
+    @Param('address') address: string,
+    @Param('requestId') requestId: string,
+  ): Promise<Request> {
     const result = await this.requestService.requests({ where: { creator: address, requestId: parseInt(requestId) } });
     if (!result) {
       throw new HttpException('Not found', HttpStatus.NOT_FOUND);
     }
-    if (result[1]) { //if length has more than one entry, this should be unique and something is very wrong
+    if (result[1]) {
+      //if length has more than one entry, this should be unique and something is very wrong
       throw new HttpException('Hackers or bugs?', HttpStatus.NOT_FOUND);
     }
     return result[0];
