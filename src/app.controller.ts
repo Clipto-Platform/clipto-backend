@@ -102,6 +102,7 @@ export class AppController {
         demos: updateUserDto.demos,
         price: updateUserDto.price,
         userName: updateUserDto.userName,
+        profilePicture: updateUserDto.profilePicture,
       },
     });
     return result;
