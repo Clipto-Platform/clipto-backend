@@ -31,7 +31,7 @@ model Request {
   description String
   deadline    Int
   delivered   Boolean  @default(false)
-  refunded   Boolean  @default(false)
+  refunded    Boolean  @default(false)
   txHash      String   @unique
   created     DateTime @default(now())
 }
