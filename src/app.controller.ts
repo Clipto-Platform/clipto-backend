@@ -6,28 +6,23 @@ import {
   HttpStatus,
   Param,
   Post,
-  UploadedFile,
+  Put,
   Request as NestRequest,
   UseGuards,
-  UseInterceptors,
-  Put,
 } from '@nestjs/common';
-import { FileInterceptor } from '@nestjs/platform-express';
-import { VerifiedUser, Request } from '@prisma/client';
-import { AppService } from './app.service';
-import { VerifyUserDto } from './dto/VerifyUser.dto';
-import { UserService } from './services/user.service';
-import * as fs from 'fs';
-import { Bundlr } from '@bundlr-network/client';
-import * as mime from 'mime-types';
-import { CreateUserDto } from './dto/CreateUserDto';
-import { CreateRequestDto } from './dto/CreateRequestDto';
-import { RequestService } from './services/request.service';
-import { BlockchainService } from './services/blockchain.service';
 import { AuthGuard } from '@nestjs/passport';
+import { Request, VerifiedUser } from '@prisma/client';
+import { AppService } from './app.service';
+import { CreateRequestDto } from './dto/CreateRequestDto';
+import { CreateUserDto } from './dto/CreateUserDto';
 import { FinishRequestDto } from './dto/FinishRequestDto';
-import { JsonRpcSigner } from '@ethersproject/providers';
+import { RefundRequestDto } from './dto/RefundRequestDto';
 import { UpdateUserDto } from './dto/UpdateUserDto';
+import { VerifyUserDto } from './dto/VerifyUser.dto';
+import { BlockchainService } from './services/blockchain.service';
+import { RequestService } from './services/request.service';
+import { UserService } from './services/user.service';
+import { isRequestExpired } from './utils';
 
 @Controller()
 export class AppController {
@@ -107,7 +102,7 @@ export class AppController {
         demos: updateUserDto.demos,
         price: updateUserDto.price,
         userName: updateUserDto.userName,
-      }
+      },
     });
     return result;
   }
@@ -159,6 +154,23 @@ export class AppController {
     }
     return result[0];
   }
+
+  @Post('request/refund')
+  public async requestRefund(@Body() refundRequestDto: RefundRequestDto) {
+    const result = await this.requestService.requests({ where: { id: refundRequestDto.id } });
+
+    if (result.length !== 1) {
+      throw new HttpException('Invalid request', HttpStatus.NOT_FOUND);
+    }
+
+    const request = result[0];
+    if (!isRequestExpired(request.created, request.deadline)) {
+      throw new HttpException('This order cannot be refunded', HttpStatus.BAD_REQUEST);
+    }
+
+    return this.requestService.updateRequest({ where: { id: refundRequestDto.id }, data: { refunded: true } });
+  }
+
   @Post('request/finish')
   public async requestFinish(@Body() finishRequestDto: FinishRequestDto) {
     if (true) {
