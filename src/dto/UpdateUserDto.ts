@@ -1,4 +1,4 @@
-import { IsArray, IsEthereumAddress, IsNumber, IsString, IsUrl } from 'class-validator';
+import { IsArray, IsNumber, IsString, IsUrl } from 'class-validator';
 
 export class UpdateUserDto {
   @IsString()
@@ -11,4 +11,6 @@ export class UpdateUserDto {
   userName: string;
   @IsNumber()
   price: number;
+  @IsUrl()
+  profilePicture: string;
 }

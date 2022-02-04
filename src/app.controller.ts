@@ -6,28 +6,23 @@ import {
   HttpStatus,
   Param,
   Post,
-  UploadedFile,
+  Put,
   Request as NestRequest,
   UseGuards,
-  UseInterceptors,
-  Put,
 } from '@nestjs/common';
-import { FileInterceptor } from '@nestjs/platform-express';
-import { VerifiedUser, Request } from '@prisma/client';
-import { AppService } from './app.service';
-import { VerifyUserDto } from './dto/VerifyUser.dto';
-import { UserService } from './services/user.service';
-import * as fs from 'fs';
-import { Bundlr } from '@bundlr-network/client';
-import * as mime from 'mime-types';
-import { CreateUserDto } from './dto/CreateUserDto';
-import { CreateRequestDto } from './dto/CreateRequestDto';
-import { RequestService } from './services/request.service';
-import { BlockchainService } from './services/blockchain.service';
 import { AuthGuard } from '@nestjs/passport';
+import { Request, VerifiedUser } from '@prisma/client';
+import { AppService } from './app.service';
+import { CreateRequestDto } from './dto/CreateRequestDto';
+import { CreateUserDto } from './dto/CreateUserDto';
 import { FinishRequestDto } from './dto/FinishRequestDto';
-import { JsonRpcSigner } from '@ethersproject/providers';
+import { RefundRequestDto } from './dto/RefundRequestDto';
 import { UpdateUserDto } from './dto/UpdateUserDto';
+import { VerifyUserDto } from './dto/VerifyUser.dto';
+import { BlockchainService } from './services/blockchain.service';
+import { RequestService } from './services/request.service';
+import { UserService } from './services/user.service';
+import { isRequestExpired } from './utils';
 
 @Controller()
 export class AppController {
@@ -36,7 +31,8 @@ export class AppController {
     private readonly userService: UserService,
     private readonly blockchainService: BlockchainService,
     private readonly requestService: RequestService,
-  ) { }
+  ) {}
+
   @Get('users')
   public async getUsers(): Promise<Array<VerifiedUser> | any> {
     const result = await this.userService.users({});
@@ -83,7 +79,7 @@ export class AppController {
       bio: createUserDto.bio,
       demos: createUserDto.demos,
       userName: createUserDto.userName,
-      price: createUserDto.price
+      price: createUserDto.price,
     });
     return result;
   }
@@ -105,8 +101,9 @@ export class AppController {
         bio: updateUserDto.bio,
         demos: updateUserDto.demos,
         price: updateUserDto.price,
-        userName: updateUserDto.userName
-      }
+        userName: updateUserDto.userName,
+        profilePicture: updateUserDto.profilePicture,
+      },
     });
     return result;
   }
@@ -117,7 +114,7 @@ export class AppController {
       await this.blockchainService.validateRequestTx(
         createRequestDto.txHash,
         createRequestDto.amount,
-        createRequestDto.requester,
+        createRequestDto.creator,
       )
     ) {
       return this.requestService.createRequest(createRequestDto);
@@ -144,16 +141,37 @@ export class AppController {
   }
 
   @Get('request/creator/:address/:requestId')
-  public async requestByCreatorAndRequestId(@Param('address') address: string, @Param('requestId') requestId: string): Promise<Request> {
+  public async requestByCreatorAndRequestId(
+    @Param('address') address: string,
+    @Param('requestId') requestId: string,
+  ): Promise<Request> {
     const result = await this.requestService.requests({ where: { creator: address, requestId: parseInt(requestId) } });
     if (!result) {
       throw new HttpException('Not found', HttpStatus.NOT_FOUND);
     }
-    if (result[1]) { //if length has more than one entry, this should be unique and something is very wrong
+    if (result[1]) {
+      //if length has more than one entry, this should be unique and something is very wrong
       throw new HttpException('Hackers or bugs?', HttpStatus.NOT_FOUND);
     }
     return result[0];
   }
+
+  @Post('request/refund')
+  public async requestRefund(@Body() refundRequestDto: RefundRequestDto) {
+    const result = await this.requestService.requests({ where: { id: refundRequestDto.id } });
+
+    if (result.length !== 1) {
+      throw new HttpException('Invalid request', HttpStatus.NOT_FOUND);
+    }
+
+    const request = result[0];
+    if (!isRequestExpired(request.created, request.deadline)) {
+      throw new HttpException('This order cannot be refunded', HttpStatus.BAD_REQUEST);
+    }
+
+    return this.requestService.updateRequest({ where: { id: refundRequestDto.id }, data: { refunded: true } });
+  }
+
   @Post('request/finish')
   public async requestFinish(@Body() finishRequestDto: FinishRequestDto) {
     if (true) {
