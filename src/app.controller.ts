@@ -12,6 +12,8 @@ import {
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { Request, VerifiedUser } from '@prisma/client';
+import axios from 'axios';
+import * as _ from 'ramda';
 import { AppService } from './app.service';
 import { CreateRequestDto } from './dto/CreateRequestDto';
 import { CreateUserDto } from './dto/CreateUserDto';
@@ -108,6 +110,7 @@ export class AppController {
     return result;
   }
 
+  @UseGuards(AuthGuard('web3'))
   @Post('request/create')
   public async requestCreate(@Body() createRequestDto: CreateRequestDto) {
     if (
@@ -117,7 +120,7 @@ export class AppController {
         createRequestDto.creator,
       )
     ) {
-      return this.requestService.createRequest(createRequestDto);
+      return this.requestService.createRequest(_.omit(['message', 'address', 'signed'], createRequestDto));
     }
     throw new HttpException('Invalid associated TX hash!', HttpStatus.BAD_REQUEST);
   }
@@ -177,19 +180,10 @@ export class AppController {
     if (true) {
       return this.requestService.updateRequest({ where: { id: finishRequestDto.id }, data: { delivered: true } });
     }
-    //throw new HttpException('Invalid associated TX hash!', HttpStatus.BAD_REQUEST);
   }
-  //todo: request / profile updates, these have to be predecated against signTypedData_v4 from users, as well as checking the relevant TXes
 
-  // @Post('upload')
-  // @UseInterceptors(FileInterceptor('asset'))
-  // async uploadFile(@UploadedFile() file: Express.Multer.File) {
-  //   const uploadResult = await this.bundlr.uploader.upload(file.buffer, [
-  //     {
-  //       name: 'Content-Type',
-  //       value: mime.lookup(file.originalname) || 'unknown',
-  //     },
-  //   ]);
-  //   return { result: `ar://${uploadResult.data.id}` };
-  // }
+  @Post('upload')
+  async uploadFile(@Body() uploadFileDto: { extension: string }) {
+    return (await axios.post(process.env.GLASS_API_URL, { ...uploadFileDto })).data;
+  }
 }
