@@ -177,11 +177,25 @@ export class AppController {
     return this.requestService.updateRequest({ where: { id: refundRequestDto.id }, data: { refunded: true } });
   }
 
+  @UseGuards(AuthGuard('web3'))
   @Post('request/finish')
-  public async requestFinish(@Body() finishRequestDto: FinishRequestDto) {
-    if (true) {
-      return this.requestService.updateRequest({ where: { id: finishRequestDto.id }, data: { delivered: true } });
+  public async requestFinish(@Body() finishRequestDto: FinishRequestDto, @NestRequest() req) {
+    const result = await this.requestService.requests({ where: { id: finishRequestDto.id } });
+
+    if (result.length !== 1) {
+      throw new HttpException('Invalid request', HttpStatus.NOT_FOUND);
     }
+
+    const request = result[0];
+    if (isRequestExpired(request.created, request.deadline)) {
+      throw new HttpException('This order is expired', HttpStatus.BAD_REQUEST);
+    }
+
+    if (req.user.address !== request.creator) {
+      throw new HttpException('Not a creator', HttpStatus.UNAUTHORIZED);
+    }
+
+    return this.requestService.updateRequest({ where: { id: finishRequestDto.id }, data: { delivered: true } });
   }
 
   @UseGuards(AuthGuard('web3'))
