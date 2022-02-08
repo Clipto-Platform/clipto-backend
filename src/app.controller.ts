@@ -12,7 +12,6 @@ import {
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { Request, VerifiedUser } from '@prisma/client';
-import axios from 'axios';
 import * as _ from 'ramda';
 import { AppService } from './app.service';
 import { CreateRequestDto } from './dto/CreateRequestDto';
@@ -20,8 +19,10 @@ import { CreateUserDto } from './dto/CreateUserDto';
 import { FinishRequestDto } from './dto/FinishRequestDto';
 import { RefundRequestDto } from './dto/RefundRequestDto';
 import { UpdateUserDto } from './dto/UpdateUserDto';
+import { FinalizeUploadDto, UploadFileDto } from './dto/UploadRequestDto';
 import { VerifyUserDto } from './dto/VerifyUser.dto';
 import { BlockchainService } from './services/blockchain.service';
+import { FileService } from './services/file.service';
 import { RequestService } from './services/request.service';
 import { UserService } from './services/user.service';
 import { isRequestExpired } from './utils';
@@ -33,6 +34,7 @@ export class AppController {
     private readonly userService: UserService,
     private readonly blockchainService: BlockchainService,
     private readonly requestService: RequestService,
+    private readonly fileService: FileService,
   ) {}
 
   @Get('users')
@@ -182,8 +184,19 @@ export class AppController {
     }
   }
 
+  @UseGuards(AuthGuard('web3'))
   @Post('upload')
-  async uploadFile(@Body() uploadFileDto: { extension: string }) {
-    return (await axios.post(process.env.GLASS_API_URL, { ...uploadFileDto })).data;
+  async uploadFile(@Body() uploadFileDto: UploadFileDto) {
+    return this.fileService.getUploadUrl(uploadFileDto.extension);
+  }
+
+  @Get('upload/status/:uploadUuid')
+  async uploadFileStatus(@Param('uploadUuid') uploadUuid: string) {
+    return this.fileService.getUploadStatus(uploadUuid);
+  }
+
+  @Post('upload/finalize')
+  async uploadFileFinalize(@Body() data: FinalizeUploadDto) {
+    return this.fileService.finalizeUpload(data);
   }
 }

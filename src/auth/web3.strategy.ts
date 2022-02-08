@@ -9,6 +9,7 @@ export class Web3Strategy extends PassportStrategy(Strategy) {
     'I am onboarding to Clipto',
     'I am updating my profile in Clipto',
     'I am creating a booking for my creator',
+    'I am uploading a video to complete the Order',
   ];
 
   constructor() {
