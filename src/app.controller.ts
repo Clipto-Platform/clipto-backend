@@ -129,7 +129,7 @@ export class AppController {
 
   @Get('request/receiver/:address')
   public async requestByReceiver(@Param('address') address: string): Promise<Request[]> {
-    const result = await this.requestService.requests({ where: { requester: address } });
+    const result = await this.requestService.requests({ where: { requester: address }, orderBy: { created: 'desc' } });
     if (!result) {
       throw new HttpException('Not found', HttpStatus.NOT_FOUND);
     }
@@ -138,7 +138,7 @@ export class AppController {
 
   @Get('request/creator/:address')
   public async requestByCreator(@Param('address') address: string): Promise<Request[]> {
-    const result = await this.requestService.requests({ where: { creator: address } });
+    const result = await this.requestService.requests({ where: { creator: address }, orderBy: { created: 'desc' } });
     if (!result) {
       throw new HttpException('Not found', HttpStatus.NOT_FOUND);
     }
