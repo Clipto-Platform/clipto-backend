@@ -21,6 +21,7 @@ import { RefundRequestDto } from './dto/RefundRequestDto';
 import { UpdateUserDto } from './dto/UpdateUserDto';
 import { FinalizeUploadDto, UploadFileDto } from './dto/UploadRequestDto';
 import { VerifyUserDto } from './dto/VerifyUser.dto';
+import { Messages, NotificationGateway } from './gateway/notification.gateway';
 import { BlockchainService } from './services/blockchain.service';
 import { FileService } from './services/file.service';
 import { RequestService } from './services/request.service';
@@ -35,6 +36,7 @@ export class AppController {
     private readonly blockchainService: BlockchainService,
     private readonly requestService: RequestService,
     private readonly fileService: FileService,
+    private readonly notifService: NotificationGateway,
   ) {}
 
   @Get('users')
@@ -122,6 +124,7 @@ export class AppController {
         createRequestDto.creator,
       )
     ) {
+      this.notifService.notify(createRequestDto.creator, { message: Messages.NewRequest });
       return this.requestService.createRequest(_.omit(['message', 'address', 'signed'], createRequestDto));
     }
     throw new HttpException('Invalid associated TX hash!', HttpStatus.BAD_REQUEST);
