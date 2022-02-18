@@ -12,6 +12,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
+import { Recaptcha } from '@nestlab/google-recaptcha';
 import { Request, VerifiedUser } from '@prisma/client';
 import * as _ from 'ramda';
 import { AppService } from './app.service';
@@ -26,7 +27,7 @@ import { BlockchainService } from './services/blockchain.service';
 import { FileService } from './services/file.service';
 import { RequestService } from './services/request.service';
 import { UserService } from './services/user.service';
-import { isRequestExpired } from './utils';
+import { getInt, isRequestExpired } from './utils';
 
 @Controller()
 export class AppController {
@@ -39,9 +40,13 @@ export class AppController {
   ) {}
 
   @Get('users')
-  public async getUsers(@Query('page') page: number, @Query('limit') limit : string): Promise<Array<VerifiedUser> | any> {
-    const items = parseInt(limit);
-    const result = await this.userService.users({take: items, skip: items*(page-1)});
+  public async getUsers(
+    @Query('page') page: string,
+    @Query('limit') limit: string,
+  ): Promise<Array<VerifiedUser> | any> {
+    const take = getInt(limit);
+    const skip = take * (getInt(page) - 1);
+    const result = await this.userService.users({ take, skip });
     if (!result) {
       throw new HttpException('Not found', HttpStatus.NOT_FOUND);
     }
@@ -114,6 +119,7 @@ export class AppController {
     return result;
   }
 
+  @Recaptcha()
   @UseGuards(AuthGuard('web3'))
   @Post('request/create')
   public async requestCreate(@Body() createRequestDto: CreateRequestDto) {
