@@ -7,12 +7,14 @@ import {
   Param,
   Post,
   Put,
+  Query,
   Request as NestRequest,
   UseGuards,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { Request, VerifiedUser } from '@prisma/client';
 import * as _ from 'ramda';
+import { skip } from 'rxjs';
 import { AppService } from './app.service';
 import { CreateRequestDto } from './dto/CreateRequestDto';
 import { CreateUserDto } from './dto/CreateUserDto';
@@ -38,10 +40,11 @@ export class AppController {
     private readonly fileService: FileService,
     private readonly notifService: NotificationGateway,
   ) {}
-
+  
   @Get('users')
-  public async getUsers(): Promise<Array<VerifiedUser> | any> {
-    const result = await this.userService.users({});
+  public async getUsers(@Query('page') page: number, @Query('limit') limit : string): Promise<Array<VerifiedUser> | any> {
+    const items = parseInt(limit);
+    const result = await this.userService.users({take: items, skip: items*(page-1)});
     if (!result) {
       throw new HttpException('Not found', HttpStatus.NOT_FOUND);
     }
