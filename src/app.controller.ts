@@ -7,6 +7,7 @@ import {
   Param,
   Post,
   Put,
+  Query,
   Request as NestRequest,
   UseGuards,
 } from '@nestjs/common';
@@ -38,8 +39,9 @@ export class AppController {
   ) {}
 
   @Get('users')
-  public async getUsers(): Promise<Array<VerifiedUser> | any> {
-    const result = await this.userService.users({});
+  public async getUsers(@Query('page') page: number, @Query('limit') limit : string): Promise<Array<VerifiedUser> | any> {
+    const items = parseInt(limit);
+    const result = await this.userService.users({take: items, skip: items*(page-1)});
     if (!result) {
       throw new HttpException('Not found', HttpStatus.NOT_FOUND);
     }
