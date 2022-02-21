@@ -11,6 +11,7 @@ export class Web3Strategy extends PassportStrategy(Strategy) {
     'I am creating a booking for my creator',
     'I am uploading a video to complete the Order',
     'I am completing an order',
+    'I am initiating refund',
   ];
 
   constructor() {
