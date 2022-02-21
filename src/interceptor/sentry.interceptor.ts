@@ -6,10 +6,11 @@ import { catchError, Observable, throwError } from 'rxjs';
 export class SentryInterceptor implements NestInterceptor {
   intercept(context: ExecutionContext, next: CallHandler<any>): Observable<any> | Promise<Observable<any>> {
     return next.handle().pipe(
-      catchError((exception: HttpException) => {
-        if (exception.getStatus() >= 500) {
-          Sentry.captureException(exception);
+      catchError((exception) => {
+        if (exception instanceof HttpException) {
+          if (exception.getStatus() >= 500) Sentry.captureException(exception);
         }
+        Sentry.captureException(exception);
         return throwError(() => exception);
       }),
     );
