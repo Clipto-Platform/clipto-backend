@@ -12,7 +12,6 @@ async function bootstrap() {
   Sentry.init({
     dsn: process.env.SENTRY_DNS,
     enabled: process.env.NODE_ENV === 'production',
-    debug: true,
   });
 
   const prismaService: PrismaService = app.get(PrismaService);
