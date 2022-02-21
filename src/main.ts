@@ -10,7 +10,7 @@ async function bootstrap() {
   app.enableCors();
 
   Sentry.init({
-    dsn: process.env.SENTRY_DNS,
+    dsn: process.env.SENTRY_DSN,
     enabled: process.env.NODE_ENV === 'production',
   });
 
