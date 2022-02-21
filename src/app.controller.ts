@@ -10,6 +10,7 @@ import {
   Query,
   Request as NestRequest,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { Recaptcha } from '@nestlab/google-recaptcha';
@@ -23,12 +24,14 @@ import { RefundRequestDto } from './dto/RefundRequestDto';
 import { UpdateUserDto } from './dto/UpdateUserDto';
 import { FinalizeUploadDto, UploadFileDto } from './dto/UploadRequestDto';
 import { VerifyUserDto } from './dto/VerifyUser.dto';
+import { SentryInterceptor } from './interceptor/sentry.interceptor';
 import { BlockchainService } from './services/blockchain.service';
 import { FileService } from './services/file.service';
 import { RequestService } from './services/request.service';
 import { UserService } from './services/user.service';
 import { getInt, isRequestExpired } from './utils';
 
+@UseInterceptors(SentryInterceptor)
 @Controller()
 export class AppController {
   constructor(
