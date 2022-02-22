@@ -16,7 +16,7 @@ import { UserService } from './services/user.service';
     GoogleRecaptchaModule.forRoot({
       secretKey: process.env.GOOGLE_RECAPTCHA_SECRET_KEY,
       response: (req) => (req.headers.recaptcha || '').toString(),
-      actions: ['SignUp'],
+      actions: ['Booking', 'Upload', 'Onboard', 'UpdateProfile', 'Refund', 'CompleteRequest'],
       score: 0.8,
     }),
     AuthModule,

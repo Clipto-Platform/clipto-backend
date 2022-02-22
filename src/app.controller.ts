@@ -71,6 +71,7 @@ export class AppController {
     return await this.appService.verifyTwitter(tweetUrl, address);
   }
 
+  @Recaptcha()
   @UseGuards(AuthGuard('web3'))
   @Post('user/create')
   public async create(@Body() createUserDto: CreateUserDto, @NestRequest() req) {
@@ -98,6 +99,7 @@ export class AppController {
     return result;
   }
 
+  @Recaptcha()
   @UseGuards(AuthGuard('web3'))
   @Put('user/:address')
   public async update(@Param('address') address: string, @Body() updateUserDto: UpdateUserDto, @NestRequest() req) {
@@ -172,8 +174,10 @@ export class AppController {
     return result[0];
   }
 
+  @Recaptcha()
+  @UseGuards(AuthGuard('web3'))
   @Post('request/refund')
-  public async requestRefund(@Body() refundRequestDto: RefundRequestDto) {
+  public async requestRefund(@Body() refundRequestDto: RefundRequestDto, @NestRequest() req) {
     const result = await this.requestService.requests({ where: { id: refundRequestDto.id } });
 
     if (result.length !== 1) {
@@ -185,9 +189,14 @@ export class AppController {
       throw new HttpException('This order cannot be refunded', HttpStatus.BAD_REQUEST);
     }
 
+    if (req.user.address !== request.requester) {
+      throw new HttpException('Not a requester', HttpStatus.UNAUTHORIZED);
+    }
+
     return this.requestService.updateRequest({ where: { id: refundRequestDto.id }, data: { refunded: true } });
   }
 
+  @Recaptcha()
   @UseGuards(AuthGuard('web3'))
   @Post('request/finish')
   public async requestFinish(@Body() finishRequestDto: FinishRequestDto, @NestRequest() req) {
