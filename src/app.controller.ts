@@ -141,8 +141,14 @@ export class AppController {
   }
 
   @Get('request/receiver/:address')
-  public async requestByReceiver(@Param('address') address: string): Promise<Request[]> {
-    const result = await this.requestService.requests({ where: { requester: address }, orderBy: { created: 'desc' } });
+  public async requestByReceiver(
+    @Param('address') address: string, 
+    @Query('page') page: string,
+    @Query('limit') limit: string,
+  ): Promise<Request[]> {
+    const take = getInt(limit);
+    const skip = take * (getInt(page) - 1);
+    const result = await this.requestService.requests({ where: { requester: address }, orderBy: { created: 'desc' }, take, skip });
     if (!result) {
       throw new HttpException('Not found', HttpStatus.NOT_FOUND);
     }
@@ -150,8 +156,14 @@ export class AppController {
   }
 
   @Get('request/creator/:address')
-  public async requestByCreator(@Param('address') address: string): Promise<Request[]> {
-    const result = await this.requestService.requests({ where: { creator: address }, orderBy: { created: 'desc' } });
+  public async requestByCreator(
+    @Param('address') address: string, 
+    @Query('page') page: string,
+    @Query('limit') limit: string,
+  ): Promise<Request[]> {
+    const take = getInt(limit);
+    const skip = take * (getInt(page) - 1);
+    const result = await this.requestService.requests({ where: { creator: address }, orderBy: { created: 'desc' }, take, skip });
     if (!result) {
       throw new HttpException('Not found', HttpStatus.NOT_FOUND);
     }
