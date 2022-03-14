@@ -14,7 +14,11 @@ $ cp .env.sample .env
 $ npm install
 $ npm run start
 ```
-4. All available commands
+4. Running end-to-end tests
+```
+$ npm run test:e2e
+```
+5. All available commands
 ```
 $ npm run
 ```
