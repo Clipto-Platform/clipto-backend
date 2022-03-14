@@ -27,8 +27,6 @@
     "@nestjs/core": "^8.0.0",
     "@nestjs/passport": "^8.0.1",
     "@nestjs/platform-express": "^8.0.0",
-    "@nestlab/google-recaptcha": "^2.1.2",
-    "@prisma/client": "^3.7.0",
     "@sentry/node": "^6.17.9",
     "arbundles": "^0.6.3",
     "class-transformer": "^0.5.1",
