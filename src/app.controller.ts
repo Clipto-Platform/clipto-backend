@@ -17,6 +17,11 @@ export class AppController {
     return await this.appService.verifyTwitter(tweetUrl, address);
   }
 
+  @Post('usersData')
+  public async getTwitterData(@Body() users: string[]) {
+    return await this.appService.getUsersTwiterData(users);
+  }
+
   @UseGuards(AuthGuard('web3'))
   @Post('upload')
   async uploadFile(@Body() uploadFileDto: UploadFileDto) {
