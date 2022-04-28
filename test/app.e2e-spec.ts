@@ -40,12 +40,33 @@ describe('AppController', () => {
   });
 
   it('should handle invalid verification via twitter', () => {
-    return request(app.getHttpServer())
+    request(app.getHttpServer())
       .post('/user/verify')
       .send({
         ...getSampleTwitter(),
         address: 'kkjdskjds',
       })
       .expect(400);
+  });
+
+  it.skip('should upload json to ipfs', (done) => {
+    const toUpload = {
+      name: 'atul',
+      metadata: {
+        name: 'atul',
+        github: 'ap-atul',
+        role: 'developer',
+      },
+    };
+
+    request(app.getHttpServer())
+      .post('/ipfs/pin')
+      .send(toUpload)
+      .expect(200)
+      .then((response) => {
+        assert(response.body.hash.toString().length > 0, true);
+        done();
+      })
+      .catch((err) => done(err));
   });
 });
