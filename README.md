@@ -2,21 +2,23 @@
 
 Does Twitter verification, accepts files & uploads to arweave.
 
-Still need to implement requests/etc.
-
-
 ## Setup
- 1. Create `.env` following `.env.example`.
-     - [How to install postgresql on macos](https://www.postgresqltutorial.com/install-postgresql-macos/)
-     - [Connection string format](https://www.codegrepper.com/code-examples/sql/get+connection+string+postgresql+in+pgadmin)
- 2. Create `wallet.json`
-     - [Create an arweave wallet and name it wallet.json at root](https://www.arweave.org/)
- 2. `npx prisma generate`
- 3. `npm start`
+1. Copy `.env` file
+```
+$ cp .env.sample .env
+```
 
- The project runs on localhost:8000
-
-
- ## useful commands
- 3. `npx prisma studio`
- 4. `npx prisma migrate` when you make changes to the schema, you need to migrate the db to the new schema
+2. Update credentials in `.env` file
+3. Run the server
+```
+$ npm install
+$ npm run start
+```
+4. Running end-to-end tests
+```
+$ npm run test:e2e
+```
+5. All available commands
+```
+$ npm run
+```
