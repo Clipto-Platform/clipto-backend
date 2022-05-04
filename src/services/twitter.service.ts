@@ -19,13 +19,12 @@ export class AppService {
       expansions: ['author_id'],
     });
 
-    if (
-      tweetResponse.data.text.indexOf(address) !== -1 &&
-      tweetResponse.data.text.toLocaleLowerCase().indexOf('@cliptodao') !== -1
-    ) {
-      return tweetResponse;
+    try {
+      const isResponse = tweetResponse.data.text.indexOf(address) !== -1 && tweetResponse.data.text.toLocaleLowerCase().indexOf('@cliptodao') !== -1
+      if (isResponse) return tweetResponse;
+    } catch (error) {
+      throw new HttpException('Verificaiton Failure', HttpStatus.BAD_REQUEST);
     }
-    throw new HttpException('Verificaiton Failure', HttpStatus.BAD_REQUEST);
   }
 
   async getUsersTwiterData(users: string[]): Promise<UsersV2Result | string> {
