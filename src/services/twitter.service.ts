@@ -33,10 +33,14 @@ export class AppService {
       'user.fields': ['id', 'name', 'profile_image_url', 'url', 'username'],
     };
 
-    const usersData = await this.twitterClient.v2.usersByUsernames(users, fields);
-    if (usersData.errors || usersData.data.length == 0) {
-      throw new HttpException('Twitter profile not found', HttpStatus.BAD_REQUEST);
+    try {
+      const usersData = await this.twitterClient.v2.usersByUsernames(users, fields);
+      if (usersData.data.length == 0) {
+        throw new HttpException('Twitter profile not found', HttpStatus.BAD_REQUEST);
+      }
+      return usersData;
+    } catch (error) {
+      throw new HttpException('Twitter profile not found or something went wrong.', HttpStatus.BAD_REQUEST);
     }
-    return usersData;
   }
 }
