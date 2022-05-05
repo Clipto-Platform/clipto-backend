@@ -48,9 +48,4 @@ export class AppController {
   async pinJsonToIpfs(@Body() data: PinAddMetadata) {
     return this.ipfsService.pin(data);
   }
-
-  @Get('ipfs/cat/:hash')
-  async catIpfs(@Param('hash') hash: string) {
-    return this.ipfsService.cat(hash);
-  }
 }

@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PinataClient } from '@pinata/sdk';
-import axios from 'axios';
+import { CID, create, IPFSHTTPClient } from 'ipfs-http-client';
 import { PinAddMetadata } from 'src/dto/Ipfs.dto';
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const pinata = require('@pinata/sdk');
@@ -8,27 +8,20 @@ const pinata = require('@pinata/sdk');
 @Injectable()
 export class IPFSService {
   private ipfs: PinataClient;
+  private graph: IPFSHTTPClient;
 
   constructor() {
     const pinataAPIKey = process.env.PINATA_API_KEY;
     const pinataAPISecret = process.env.PINATA_API_SECRET;
 
     this.ipfs = pinata(pinataAPIKey, pinataAPISecret);
+    this.graph = create({
+      url: 'https://api.thegraph.com/ipfs/api/v0',
+    });
   }
 
-  private async get(endpoint: string) {
-    const response = await axios.get(endpoint);
-    return response.data;
-  }
-
-  private async pinataGateway(hash: string): Promise<any> {
-    const endpoint = `https://gateway.pinata.cloud/ipfs/${hash}`;
-    return this.get(endpoint);
-  }
-
-  private async ipfsGateway(hash: string): Promise<any> {
-    const endpoint = `https://ipfs.io/ipfs/${hash}`;
-    return this.get(endpoint);
+  private async pinToGraph(hash: string) {
+    await this.graph.pin.add(CID.parse(hash));
   }
 
   public async pin(data: PinAddMetadata): Promise<any> {
@@ -40,14 +33,10 @@ export class IPFSService {
         cidVersion: 1,
       },
     });
-    return response;
-  }
 
-  public async cat(hash: string) {
-    try {
-      return this.pinataGateway(hash);
-    } catch {
-      return this.ipfsGateway(hash);
-    }
+    // pin the new hash on graph for subgraph indexing
+    this.pinToGraph(response.IpfsHash);
+
+    return response;
   }
 }
