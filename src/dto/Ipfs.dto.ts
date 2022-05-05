@@ -4,5 +4,5 @@ export class PinAddMetadata {
   @IsString()
   name: string;
   @IsObject()
-  metadata: string;
+  metadata: any;
 }
