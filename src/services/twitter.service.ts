@@ -20,8 +20,12 @@ export class AppService {
     });
 
     try {
-      const isResponse = tweetResponse.data.text.indexOf(address) !== -1 && tweetResponse.data.text.toLocaleLowerCase().indexOf('@cliptodao') !== -1
+      const isResponse =
+        tweetResponse.data.text.indexOf(address) !== -1 &&
+        tweetResponse.data.text.toLocaleLowerCase().indexOf('@cliptodao') !== -1;
       if (isResponse) return tweetResponse;
+
+      throw new HttpException('Verificaiton Failure', HttpStatus.BAD_REQUEST);
     } catch (error) {
       throw new HttpException('Verificaiton Failure', HttpStatus.BAD_REQUEST);
     }
