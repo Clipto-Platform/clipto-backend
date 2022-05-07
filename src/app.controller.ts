@@ -1,21 +1,15 @@
 import { Body, Controller, Get, Param, Post, UseGuards, UseInterceptors } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
-import { PinAddMetadata } from './dto/Ipfs.dto';
 import { FinalizeUploadDto, UploadFileDto } from './dto/UploadFile.dto';
 import { VerifyUserDto } from './dto/VerifyUser.dto';
 import { SentryInterceptor } from './interceptor/sentry.interceptor';
 import { FileService } from './services/file.service';
-import { IPFSService } from './services/ipfs.service';
 import { AppService } from './services/twitter.service';
 
 @UseInterceptors(SentryInterceptor)
 @Controller()
 export class AppController {
-  constructor(
-    private readonly appService: AppService,
-    private readonly fileService: FileService,
-    private readonly ipfsService: IPFSService,
-  ) {}
+  constructor(private readonly appService: AppService, private readonly fileService: FileService) {}
 
   @Post('user/verify')
   public async verifyUser(@Body() verifyUserDto: VerifyUserDto) {
@@ -42,10 +36,5 @@ export class AppController {
   @Post('upload/finalize')
   async uploadFileFinalize(@Body() data: FinalizeUploadDto) {
     return this.fileService.finalizeUpload(data);
-  }
-
-  @Post('ipfs/pin')
-  async pinJsonToIpfs(@Body() data: PinAddMetadata) {
-    return this.ipfsService.pin(data);
   }
 }
