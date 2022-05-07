@@ -21,7 +21,11 @@ export class IPFSService {
   }
 
   private async pinToGraph(hash: string) {
-    await this.graph.pin.add(CID.parse(hash));
+    try {
+      await this.graph.pin.add(CID.parse(hash));
+    } catch (e) {
+      console.log(`failed to pin hash to graph node hash: ${hash}`);
+    }
   }
 
   public async pin(data: PinAddMetadata): Promise<any> {
@@ -30,7 +34,7 @@ export class IPFSService {
         name: data.name,
       },
       pinataOptions: {
-        cidVersion: 1,
+        cidVersion: 0,
       },
     });
 
