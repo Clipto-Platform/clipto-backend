@@ -1,10 +1,10 @@
 import { Body, Controller, Get, Param, Post, UseGuards, UseInterceptors } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
-import { AppService } from './app.service';
-import { FinalizeUploadDto, UploadFileDto } from './dto/UploadFileDto';
+import { FinalizeUploadDto, UploadFileDto } from './dto/UploadFile.dto';
 import { VerifyUserDto } from './dto/VerifyUser.dto';
 import { SentryInterceptor } from './interceptor/sentry.interceptor';
 import { FileService } from './services/file.service';
+import { AppService } from './services/twitter.service';
 
 @UseInterceptors(SentryInterceptor)
 @Controller()

@@ -40,7 +40,7 @@ describe('AppController', () => {
   });
 
   it('should handle invalid verification via twitter', () => {
-    return request(app.getHttpServer())
+    request(app.getHttpServer())
       .post('/user/verify')
       .send({
         ...getSampleTwitter(),
