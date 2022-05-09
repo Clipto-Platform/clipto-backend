@@ -1,6 +1,6 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import axios, { AxiosInstance } from 'axios';
-import { FinalizeUploadDto } from 'src/dto/UploadFileDto';
+import { FinalizeUploadDto } from 'src/dto/UploadFile.dto';
 
 @Injectable()
 export class FileService {
