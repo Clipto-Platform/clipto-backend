@@ -18,3 +18,9 @@ export class FinalizeUploadDto {
   @IsString()
   description: string;
 }
+
+export class TweetBody {
+  tweetBody: string;
+  message: string;
+  signature: string
+}

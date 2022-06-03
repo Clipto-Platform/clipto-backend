@@ -1,6 +1,6 @@
-import { Body, Controller, Get, Param, Post, UseGuards, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, UseGuards, UseInterceptors, Headers } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
-import { FinalizeUploadDto, UploadFileDto } from './dto/UploadFile.dto';
+import { FinalizeUploadDto, UploadFileDto, TweetBody } from './dto/UploadFile.dto';
 import { VerifyUserDto } from './dto/VerifyUser.dto';
 import { SentryInterceptor } from './interceptor/sentry.interceptor';
 import { FileService } from './services/file.service';
@@ -36,5 +36,16 @@ export class AppController {
   @Post('upload/finalize')
   async uploadFileFinalize(@Body() data: FinalizeUploadDto) {
     return this.fileService.finalizeUpload(data);
+  }
+
+  @Post('tweet/create')
+  async createTweet(@Body() data: any) {
+    const { message, signature, tweetBody } = data
+    return this.appService.createTweet(tweetBody, message, signature)
+  }
+
+  @Get('nonce')
+  async generateNonce() {
+    return this.appService.generateNonce();
   }
 }
